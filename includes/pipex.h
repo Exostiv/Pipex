@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tnicoue <tnicoue@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/23 11:47:46 by tnicoue           #+#    #+#             */
-/*   Updated: 2022/03/21 13:06:33 by tnicoue          ###   ########.fr       */
+/*   Created: 2022/05/23 10:17:57 by tnicoue           #+#    #+#             */
+/*   Updated: 2022/05/24 10:29:27 by tnicoue          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ size_t	ft_strlen(const char *s);
 void	ft_putstr_fd(char *s, int fd);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
-void	run(char *argv, char **envp);
+void	run(char *argv, char **env);
 char	*ft_strnstr(const char *big, const char *little, size_t len);
 
 #endif

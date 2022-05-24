@@ -5,52 +5,53 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tnicoue <tnicoue@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/23 11:46:13 by tnicoue           #+#    #+#             */
-/*   Updated: 2022/03/22 09:31:02 by tnicoue          ###   ########.fr       */
+/*   Created: 2022/05/23 10:17:45 by tnicoue           #+#    #+#             */
+/*   Updated: 2022/05/24 10:29:23 by tnicoue          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/pipex.h"
 
-
-void	parent_process(int fileout, char **argv, char **envp, int *end)
+void	parent(int fileout, char **argv, char **envp, int *tuyau)
 {
-	dup2(end[0], STDIN_FILENO);
+	dup2(tuyau[0], STDIN_FILENO);
 	dup2(fileout, STDOUT_FILENO);
-	close(end[1]);
+	close(tuyau[1]);
 	run(argv[3], envp);
 }
 
-void	child_process(int filein, char **argv, char **envp, int *end)
+void	child(int filein, char **argv, char **envp, int *tuyau)
 {
-	dup2(end[1], STDOUT_FILENO);
+	dup2(tuyau[1], STDOUT_FILENO);
 	dup2(filein, STDIN_FILENO);
-	close(end[0]);
+	close(tuyau[0]);
 	run(argv[2], envp);
 }
 
 void	pipex(int filein, int fileout, char **argv, char **envp)
 {
-	int		end[2];
-	int		parent;
+	int		tuyau[2];
+	int		pid;
 
-	if (pipe(end) == -1)
+	if (pipe(tuyau) == -1)
 	{
 		perror("Pipe failed");
 		exit(EXIT_FAILURE);
 	}
-	parent = fork();
-	if (parent == -1)
+	pid = fork();
+	if (pid == -1)
 	{
 		perror("Fork failed");
 		exit(EXIT_FAILURE);
 	}
-	if (parent == 0)
-		child_process(filein, argv, envp, end);
+	if (pid == 0)
+	{
+		child(filein, argv, envp, tuyau);
+	}
 	else
 	{
-		waitpid(parent, NULL, 0);
-		parent_process(fileout, argv, envp, end);
+		waitpid(pid, NULL, 0);
+		parent(fileout, argv, envp, tuyau);
 	}
 }
 

@@ -5,19 +5,12 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tnicoue <tnicoue@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/01 15:33:37 by tnicoue           #+#    #+#             */
-/*   Updated: 2022/03/21 13:05:55 by tnicoue          ###   ########.fr       */
+/*   Created: 2022/05/23 10:20:18 by tnicoue           #+#    #+#             */
+/*   Updated: 2022/05/24 10:29:15 by tnicoue          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/pipex.h"
-
-/* int execve(const char *fichier, char *const argv[], char *envp[]); 
-execute le fichier argv est un tableau de chaînes d'arguments passées 
-au nouveau programme. envp est un tableau de chaînes, 
-ayant par convention la forme clé=valeur, qui sont passées au nouveau 
-programme comme environnement.
-*/
 
 void	free_tab(char **tab)
 {
@@ -29,13 +22,13 @@ void	free_tab(char **tab)
 	free(tab);
 }
 
-char	*get_p(char *p, char *cmd)
+char	*joincmd(char *oldpath, char *cmd)
 {
-	char	*path;
+	char	*newpath;
 
-	path = ft_strjoin(p, cmd);
-	free(p);
-	return (path);
+	newpath = ft_strjoin(oldpath, cmd);
+	free(oldpath);
+	return (newpath);
 }
 
 char	*get_path(char **env)
@@ -52,30 +45,39 @@ char	*get_path(char **env)
 	return (NULL);
 }
 
+char	*accessverif(char **argv, char **cmd)
+{
+	int	i;
+
+	i = 0;
+	while (argv[i])
+	{
+		argv[i] = joincmd(ft_strjoin(argv[i], "/"), cmd[0]);
+		if (access(argv[i], R_OK) == 0)
+			return (argv[i]);
+		i++;
+	}
+	return (NULL);
+}
+
 void	run(char *argv, char **envp)
 {
 	char	**cmd;
-	char	**mypaths;
+	char	**oldpath;
 	char	*path;
-	int		i;
-	int		exec;
+	int		check;
 
-	mypaths = ft_split(get_path(envp), ':');
+	check = 0;
+	oldpath = ft_split(get_path(envp), ':');
 	cmd = ft_split(argv, ' ');
-	i = 0;
-	exec = 0;
-	while (mypaths[i])
+	path = accessverif(oldpath, cmd);
+	free_tab(oldpath);
+	if (execve(path, cmd, envp) == 0)
+		check = 1;
+	if (check == 1)
 	{
-		path = get_p(ft_strjoin(mypaths[i], "/"), cmd[0]);
-		if (execve(path, cmd, envp) == 0)
-			exec = 1;
 		free(path);
-		i++;
-	}
-	free_tab(mypaths);
-	free_tab(cmd);
-	if (exec == 0)
-	{
+		free_tab(cmd);
 		perror("Error bad commands");
 		exit(EXIT_FAILURE);
 	}
